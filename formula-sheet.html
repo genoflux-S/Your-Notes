@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formula Sheet — HSC PCM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #000000;
+      --orange: #ea580c;
+      --orange-bright: #f97316;
+      --orange-dim: rgba(234,88,12,0.7);
+      --orange-faint: rgba(234,88,12,0.08);
+      --white: #ffffff;
+      --white-dim: rgba(255,255,255,0.5);
+      --white-faint: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(234,88,12,0.5);
+      --gold: #fbbf24;
+      --gold-dim: rgba(251,191,36,0.8);
+    }
+
+    html, body {
+      width: 100%;
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    .bg-blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(110px); pointer-events: none; z-index: 0;
+    }
+    .bg-blob-1 {
+      width: 520px; height: 520px; top: -140px; left: -120px;
+      background: radial-gradient(circle, rgba(120,40,5,0.5) 0%, transparent 70%);
+    }
+    .bg-blob-2 {
+      width: 580px; height: 580px; bottom: -160px; right: -160px;
+      background: radial-gradient(circle, rgba(234,88,12,0.28) 0%, transparent 70%);
+    }
+    .bg-blob-3 {
+      width: 300px; height: 300px; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      background: radial-gradient(circle, rgba(249,115,22,0.07) 0%, transparent 70%);
+    }
+
+    #bubbleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+    .page {
+      position: relative; z-index: 2;
+      max-width: 900px; margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    .back {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--white-dim); text-decoration: none;
+      margin-bottom: 52px; transition: color 0.3s;
+      animation: fadeDown 0.7s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .back:hover { color: var(--white); }
+    .back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    .header {
+      margin-bottom: 16px;
+      animation: fadeDown 0.8s 0.05s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .eyebrow {
+      font-size: 0.68rem; letter-spacing: 5px; text-transform: uppercase;
+      color: var(--white-dim); margin-bottom: 14px;
+    }
+    .title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.8rem,5vw,3rem); font-weight: 900; letter-spacing: -1px;
+      color: var(--white); text-shadow: 0 0 60px rgba(249,115,22,0.45); line-height: 1;
+    }
+    .subtitle {
+      font-size: 0.82rem; letter-spacing: 1px;
+      color: var(--white-dim); margin-top: 10px;
+    }
+    .divider {
+      width: 50px; height: 1px; margin-top: 20px;
+      background: linear-gradient(90deg, transparent, var(--orange-bright), transparent);
+    }
+
+    .urgency-bar {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 10px 20px; margin: 28px 0 36px;
+      border-radius: 8px; border: 1px solid rgba(251,191,36,0.25);
+      background: rgba(251,191,36,0.05);
+      animation: fadeUp 0.8s 0.1s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .urgency-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gold); box-shadow: 0 0 8px var(--gold);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    .urgency-text {
+      font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.5; transform:scale(0.85); }
+    }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 14px;
+      animation: fadeUp 0.8s 0.12s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .card {
+      position: relative; display: flex; flex-direction: column;
+      padding: 28px 24px 24px; border-radius: 16px;
+      border: 1px solid var(--border); background: var(--white-faint);
+      backdrop-filter: blur(16px); text-decoration: none; color: var(--white);
+      cursor: pointer; overflow: hidden;
+      transition: border-color 0.35s, box-shadow 0.35s, transform 0.35s cubic-bezier(0.22,1,0.36,1), background 0.35s;
+      animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .card:nth-child(1) { animation-delay: 0.14s; }
+    .card:nth-child(2) { animation-delay: 0.20s; }
+    .card:nth-child(3) { animation-delay: 0.26s; }
+
+    .card::before {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(135deg, rgba(234,88,12,0.1) 0%, transparent 60%);
+      opacity:0; transition: opacity 0.35s;
+    }
+    .card:hover {
+      border-color: var(--border-hover);
+      background: rgba(234,88,12,0.05);
+      box-shadow: 0 0 40px rgba(0,0,0,0.6), 0 0 24px rgba(234,88,12,0.12);
+      transform: translateY(-6px);
+    }
+    .card:hover::before { opacity:1; }
+
+    .card-subject {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--orange-bright); margin-bottom: 4px;
+    }
+    .card-name { font-size: 1rem; font-weight: 500; color: var(--white); margin-bottom: 8px; line-height: 1.3; }
+    .card-desc { font-size: 0.72rem; font-weight: 300; color: var(--white-dim); letter-spacing: 0.5px; line-height: 1.5; flex: 1; }
+    .card-price-row { display: flex; align-items: baseline; gap: 8px; margin-top: 20px; }
+    .card-price { font-family: 'Orbitron', monospace; font-size: 1.5rem; font-weight: 900; color: var(--white); text-shadow: 0 0 20px rgba(249,115,22,0.4); }
+    .card-currency { font-size: 0.9rem; font-weight: 400; color: var(--orange-bright); }
+    .card-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 16px; padding: 10px 16px; border-radius: 8px;
+      border: 1px solid rgba(234,88,12,0.35); background: rgba(234,88,12,0.1);
+      font-size: 0.72rem; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--orange-bright); transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    .card:hover .card-btn {
+      background: rgba(234,88,12,0.2); border-color: rgba(234,88,12,0.6);
+      box-shadow: 0 0 20px rgba(234,88,12,0.15);
+    }
+
+    /* MEGA CARD */
+    .card-mega {
+      grid-column: 1 / -1;
+      display: flex; flex-direction: row; align-items: center; justify-content: space-between;
+      gap: 24px; padding: 36px 40px; border-radius: 16px;
+      border: 1px solid rgba(251,191,36,0.3);
+      background: linear-gradient(135deg, rgba(234,88,12,0.06) 0%, rgba(251,191,36,0.04) 100%);
+      backdrop-filter: blur(20px); text-decoration: none; color: var(--white);
+      cursor: pointer; overflow: hidden; position: relative;
+      transition: border-color 0.35s, box-shadow 0.35s, transform 0.35s cubic-bezier(0.22,1,0.36,1);
+      animation: fadeUp 0.9s 0.34s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .card-mega::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(249,115,22,0.08) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 50%, rgba(251,191,36,0.06) 0%, transparent 60%);
+      opacity:0; transition: opacity 0.4s;
+    }
+    .card-mega:hover {
+      border-color: rgba(251,191,36,0.6);
+      box-shadow: 0 0 60px rgba(0,0,0,0.7), 0 0 40px rgba(234,88,12,0.15), 0 0 40px rgba(251,191,36,0.1);
+      transform: translateY(-5px);
+    }
+    .card-mega:hover::before { opacity:1; }
+
+    .mega-left { flex:1; position:relative; z-index:1; }
+    .mega-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 100px;
+      border: 1px solid rgba(251,191,36,0.4); background: rgba(251,191,36,0.08);
+      font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 16px;
+    }
+    .mega-badge-dot {
+      width:5px; height:5px; border-radius:50%; background:var(--gold);
+      box-shadow:0 0 6px var(--gold); animation: pulse 1.6s ease-in-out infinite;
+    }
+    .mega-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.3rem,3vw,2rem); font-weight:900; letter-spacing:-0.5px;
+      line-height:1.1; color:var(--white); text-shadow:0 0 40px rgba(249,115,22,0.3);
+      margin-bottom: 10px;
+    }
+    .mega-title span { color: var(--orange-bright); }
+    .mega-desc {
+      font-size:0.8rem; font-weight:300; color:var(--white-dim);
+      letter-spacing:0.5px; line-height:1.6; margin-bottom:18px;
+    }
+    .mega-chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .mega-chip {
+      padding:4px 12px; border-radius:100px;
+      border:1px solid rgba(249,115,22,0.25); background:rgba(249,115,22,0.06);
+      font-size:0.65rem; letter-spacing:2px; color:rgba(249,115,22,0.8); text-transform:uppercase;
+    }
+
+    .mega-right {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:4px; text-align:center; flex-shrink:0; position:relative; z-index:1;
+    }
+    .mega-old-price { font-size:0.85rem; color:rgba(255,255,255,0.3); text-decoration:line-through; letter-spacing:1px; }
+    .mega-save { font-size:0.6rem; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:2px; }
+    .mega-price-wrap { display:flex; align-items:flex-start; gap:4px; }
+    .mega-rs { font-family:'Orbitron',monospace; font-size:1rem; font-weight:700; color:var(--gold); margin-top:6px; }
+    .mega-price {
+      font-family:'Orbitron',monospace;
+      font-size:clamp(2.2rem,5vw,3.2rem); font-weight:900;
+      color:var(--white); line-height:1;
+      text-shadow: 0 0 30px rgba(251,191,36,0.5), 0 0 60px rgba(249,115,22,0.3);
+    }
+    .mega-btn {
+      margin-top:20px; padding:14px 36px; border-radius:10px;
+      border:1px solid rgba(251,191,36,0.5);
+      background:linear-gradient(135deg,rgba(234,88,12,0.2) 0%,rgba(251,191,36,0.12) 100%);
+      font-family:'Orbitron',monospace; font-size:0.65rem; font-weight:700;
+      letter-spacing:3px; text-transform:uppercase; color:var(--gold);
+      cursor:pointer; transition:all 0.3s; white-space:nowrap;
+    }
+    .card-mega:hover .mega-btn {
+      background:linear-gradient(135deg,rgba(234,88,12,0.3) 0%,rgba(251,191,36,0.2) 100%);
+      border-color:rgba(251,191,36,0.8);
+      box-shadow:0 0 30px rgba(251,191,36,0.2),0 0 30px rgba(234,88,12,0.15);
+      color:#fff;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position:fixed; inset:0; z-index:100;
+      background:rgba(0,0,0,0.85); backdrop-filter:blur(10px);
+      display:flex; align-items:center; justify-content:center; padding:24px;
+      opacity:0; pointer-events:none; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
+    .modal {
+      position:relative; width:100%; max-width:440px;
+      background:#0a0a0a; border:1px solid rgba(234,88,12,0.3);
+      border-radius:20px; padding:40px 36px;
+      box-shadow:0 0 80px rgba(0,0,0,0.8),0 0 40px rgba(234,88,12,0.1);
+      transform:translateY(20px) scale(0.97);
+      transition:transform 0.35s cubic-bezier(0.22,1,0.36,1);
+    }
+    .modal-overlay.open .modal { transform:translateY(0) scale(1); }
+    .modal-close {
+      position:absolute; top:16px; right:20px;
+      background:none; border:none; cursor:pointer;
+      color:var(--white-dim); font-size:1.2rem; line-height:1; transition:color 0.2s;
+    }
+    .modal-close:hover { color:var(--white); }
+    .modal-eyebrow { font-size:0.62rem; letter-spacing:4px; text-transform:uppercase; color:var(--orange-bright); margin-bottom:8px; }
+    .modal-title { font-family:'Orbitron',monospace; font-size:1.1rem; font-weight:900; color:var(--white); margin-bottom:6px; }
+    .modal-price { font-family:'Orbitron',monospace; font-size:2rem; font-weight:900; color:var(--white); text-shadow:0 0 20px rgba(249,115,22,0.4); margin-bottom:24px; }
+    .modal-price span { font-size:1rem; color:var(--orange-bright); }
+    .modal-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(234,88,12,0.3),transparent); margin-bottom:24px; }
+    .modal-label { font-size:0.65rem; letter-spacing:3px; text-transform:uppercase; color:var(--white-dim); margin-bottom:8px; }
+    .modal-input {
+      width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+      border-radius:8px; padding:12px 16px; font-family:'Inter',sans-serif;
+      font-size:0.88rem; color:var(--white); margin-bottom:14px; outline:none;
+      transition:border-color 0.3s, box-shadow 0.3s;
+    }
+    .modal-input::placeholder { color:rgba(255,255,255,0.2); }
+    .modal-input:focus { border-color:rgba(234,88,12,0.5); box-shadow:0 0 0 3px rgba(234,88,12,0.08); }
+    .modal-upi {
+      display:flex; align-items:center; gap:10px;
+      padding:14px 16px; border-radius:8px;
+      border:1px solid rgba(234,88,12,0.2); background:rgba(234,88,12,0.06); margin-bottom:20px;
+    }
+    .upi-logo {
+      font-family:'Orbitron',monospace; font-size:0.55rem; font-weight:900; letter-spacing:1px;
+      padding:4px 8px; border-radius:4px; background:linear-gradient(135deg,#c2410c,#ea580c); color:#fff; flex-shrink:0;
+    }
+    .upi-id { font-size:0.88rem; letter-spacing:0.5px; color:var(--white); }
+    .upi-copy {
+      margin-left:auto; background:none; border:none; cursor:pointer;
+      font-size:0.62rem; letter-spacing:2px; text-transform:uppercase;
+      color:var(--orange-bright); padding:4px 8px; border-radius:4px; transition:background 0.2s;
+    }
+    .upi-copy:hover { background:rgba(249,115,22,0.1); }
+    .modal-note { font-size:0.68rem; letter-spacing:0.5px; color:rgba(255,255,255,0.3); line-height:1.5; margin-bottom:20px; }
+    .modal-pay-btn {
+      width:100%; padding:14px; border-radius:10px; border:none;
+      background:linear-gradient(135deg,#ea580c,#f97316);
+      font-family:'Orbitron',monospace; font-size:0.7rem; font-weight:700;
+      letter-spacing:3px; text-transform:uppercase; color:#fff; cursor:pointer;
+      box-shadow:0 4px 20px rgba(234,88,12,0.35); transition:all 0.3s;
+    }
+    .modal-pay-btn:hover { box-shadow:0 4px 32px rgba(234,88,12,0.55); transform:translateY(-2px); }
+
+    .footer { margin-top:56px; text-align:center; font-size:0.65rem; letter-spacing:4px; text-transform:uppercase; color:rgba(255,255,255,0.15); }
+
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-22px);} to{opacity:1;transform:translateY(0);} }
+    @keyframes fadeUp   { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+
+    @media (max-width:640px) {
+      .grid { grid-template-columns:1fr; }
+      .card-mega { flex-direction:column; align-items:flex-start; padding:28px 24px; }
+      .mega-right { align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<div class="bg-blob bg-blob-3"></div>
+<canvas id="bubbleCanvas"></canvas>
+
+<div class="page">
+
+  <a class="back" href="index.html">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
+
+  <div class="header">
+    <p class="eyebrow">HSC Science PCM &nbsp;·&nbsp; Formula Sheets</p>
+    <h1 class="title">Formula Sheet</h1>
+    <p class="subtitle">Every formula you need — clean, concise, exam-ready.</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="urgency-bar">
+    <div class="urgency-dot"></div>
+    <span class="urgency-text">Exam season — get your formula sheet now</span>
+  </div>
+
+  <div class="grid">
+
+    <a class="card" href="#" data-subject="Physics Formula Sheet" data-price="50">
+      <div class="card-subject">Physics</div>
+      <div class="card-name">Physics Formula Sheet</div>
+      <div class="card-price-row">
+        <span class="card-currency">₹</span>
+        <span class="card-price">50</span>
+      </div>
+      <div class="card-btn">Get Sheet &nbsp;→</div>
+    </a>
+
+    <a class="card" href="#" data-subject="Chemistry Formula Sheet" data-price="50">
+      <div class="card-subject">Chemistry</div>
+      <div class="card-name">Chemistry Formula Sheet</div>
+      <div class="card-price-row">
+        <span class="card-currency">₹</span>
+        <span class="card-price">50</span>
+      </div>
+      <div class="card-btn">Get Sheet &nbsp;→</div>
+    </a>
+
+    <a class="card" href="#" data-subject="Maths Formula Sheet" data-price="50">
+      <div class="card-subject">Maths</div>
+      <div class="card-name">Maths Formula Sheet</div>
+      <div class="card-price-row">
+        <span class="card-currency">₹</span>
+        <span class="card-price">50</span>
+      </div>
+      <div class="card-btn">Get Sheet &nbsp;→</div>
+    </a>
+
+    <a class="card-mega" href="#" data-subject="All Formula Sheets Bundle (Physics + Chemistry + Maths)" data-price="100">
+      <div class="mega-left">
+        <div class="mega-badge">
+          <div class="mega-badge-dot"></div>
+          Best Value &nbsp;·&nbsp; Save ₹50
+        </div>
+        <div class="mega-title">All Formula Sheets<br><span>Complete Bundle</span></div>
+        <div class="mega-desc">
+          Get Physics, Chemistry &amp; Maths formula sheets together.<br>
+          Every formula. One payment. Zero stress.
+        </div>
+        <div class="mega-chips">
+          <span class="mega-chip">Physics</span>
+          <span class="mega-chip">Chemistry</span>
+          <span class="mega-chip">Maths</span>
+          <span class="mega-chip">✨ Best Deal</span>
+        </div>
+      </div>
+      <div class="mega-right">
+        <div class="mega-save">You save ₹50</div>
+        <div class="mega-old-price">₹150</div>
+        <div class="mega-price-wrap">
+          <div class="mega-rs">₹</div>
+          <div class="mega-price">100</div>
+        </div>
+        <div class="mega-btn">Get All Sheets →</div>
+      </div>
+    </a>
+
+  </div>
+
+  <p class="footer">HSC 2025–26 &nbsp;·&nbsp; GenoFlux &nbsp;·&nbsp; All rights reserved</p>
+
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-eyebrow">Secure Payment</div>
+    <div class="modal-title" id="modalTitle">Physics Formula Sheet</div>
+    <div class="modal-price"><span>₹</span><span id="modalPrice">50</span></div>
+    <div class="modal-divider"></div>
+
+    <div class="modal-label">Your Name</div>
+    <input class="modal-input" type="text" placeholder="Enter your name" id="payName"/>
+
+    <div class="modal-label">WhatsApp / Phone Number</div>
+    <input class="modal-input" type="tel" placeholder="+91 XXXXX XXXXX" id="payPhone"/>
+
+    <div class="modal-label">Pay via UPI</div>
+    <div class="modal-upi">
+      <span class="upi-logo">UPI</span>
+      <span class="upi-id" id="upiId">genoflux@upi</span>
+      <button class="upi-copy" id="copyBtn">Copy</button>
+    </div>
+
+    <div class="modal-note">
+      After payment, send your screenshot &amp; name to our WhatsApp. Formula sheet will be shared within 10–15 minutes. 📲
+    </div>
+
+    <button class="modal-pay-btn" id="whatsappBtn">Send Screenshot on WhatsApp →</button>
+  </div>
+</div>
+
+<script>
+  /* BUBBLES */
+  const canvas = document.getElementById('bubbleCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, bubbles = [];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  const COLORS = [{r:120,g:40,b:5},{r:234,g:88,b:12},{r:249,g:115,b:22}];
+  class Bubble {
+    constructor() { this.reset(true); }
+    reset(initial=false) {
+      this.r=4+Math.random()*20; this.x=Math.random()*W;
+      this.y=initial?Math.random()*H:H+this.r+10;
+      this.vx=(Math.random()-0.5)*0.4; this.vy=-(0.2+Math.random()*0.45);
+      this.col=COLORS[Math.floor(Math.random()*COLORS.length)];
+      this.alpha=0.06+Math.random()*0.13; this.phase=Math.random()*Math.PI*2;
+      this.pspd=0.008+Math.random()*0.014;
+    }
+    draw() {
+      this.x+=this.vx; this.y+=this.vy; this.phase+=this.pspd;
+      const a=this.alpha+Math.sin(this.phase)*0.03;
+      const r=this.r+Math.sin(this.phase)*1.5;
+      const {r:cr,g:cg,b:cb}=this.col;
+      const grd=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,r*3);
+      grd.addColorStop(0,`rgba(${cr},${cg},${cb},${(a*1.2).toFixed(3)})`);
+      grd.addColorStop(0.4,`rgba(${cr},${cg},${cb},${(a*0.5).toFixed(3)})`);
+      grd.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
+      ctx.beginPath(); ctx.arc(this.x,this.y,r*3,0,Math.PI*2); ctx.fillStyle=grd; ctx.fill();
+      ctx.beginPath(); ctx.arc(this.x,this.y,r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(${cr},${cg},${cb},${(a*2).toFixed(3)})`; ctx.lineWidth=0.8; ctx.stroke();
+      if(this.y<-this.r*5||this.x<-80||this.x>W+80) this.reset();
+    }
+  }
+  function init(){resize();bubbles=Array.from({length:28},()=>new Bubble());}
+  function loop(){ctx.clearRect(0,0,W,H);bubbles.forEach(b=>b.draw());requestAnimationFrame(loop);}
+  window.addEventListener('resize',resize); init(); loop();
+
+  /* MODAL */
+  const overlay     = document.getElementById('modalOverlay');
+  const modalClose  = document.getElementById('modalClose');
+  const modalTitle  = document.getElementById('modalTitle');
+  const modalPrice  = document.getElementById('modalPrice');
+  const copyBtn     = document.getElementById('copyBtn');
+  const upiId       = document.getElementById('upiId');
+  const whatsappBtn = document.getElementById('whatsappBtn');
+
+  // ⚠️ REPLACE THESE with your real UPI ID and WhatsApp number
+  const UPI_ID      = 'genoflux@upi';
+  const WHATSAPP_NO = '919999999999'; // countrycode+number, no +
+
+  function openModal(subject, price) {
+    modalTitle.textContent = subject;
+    modalPrice.textContent = price;
+    upiId.textContent = UPI_ID;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('[data-subject]').forEach(el => {
+    el.addEventListener('click', e => { e.preventDefault(); openModal(el.dataset.subject, el.dataset.price); });
+  });
+  modalClose.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if(e.target===overlay) closeModal(); });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(UPI_ID).then(() => {
+      copyBtn.textContent='Copied!';
+      setTimeout(()=>{ copyBtn.textContent='Copy'; }, 2000);
+    });
+  });
+
+  whatsappBtn.addEventListener('click', () => {
+    const name  = document.getElementById('payName').value.trim() || 'Student';
+    const phone = document.getElementById('payPhone').value.trim();
+    const msg = encodeURIComponent(
+      `Hi! I've paid ₹${modalPrice.textContent} for *${modalTitle.textContent}*.\n\nName: ${name}\nPhone: ${phone}\n\n[Attaching payment screenshot]`
+    );
+    window.open(`https://wa.me/${WHATSAPP_NO}?text=${msg}`, '_blank');
+  });
+</script>
+</body>
+</html>

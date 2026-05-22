@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chemistry — HSC Study Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #000000;
+      --teal: #0d9488;
+      --teal-dim: rgba(13,148,136,0.7);
+      --teal-faint: rgba(13,148,136,0.08);
+      --navy: #134e4a;
+      --white: #ffffff;
+      --white-dim: rgba(255,255,255,0.5);
+      --white-faint: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(13,148,136,0.5);
+    }
+
+    html, body {
+      width: 100%;
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── BG BLOBS ── */
+    .bg-blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(110px); pointer-events: none; z-index: 0;
+    }
+    .bg-blob-1 {
+      width: 520px; height: 520px; top: -140px; left: -120px;
+      background: radial-gradient(circle, rgba(19,78,74,0.45) 0%, transparent 70%);
+    }
+    .bg-blob-2 {
+      width: 580px; height: 580px; bottom: -160px; right: -160px;
+      background: radial-gradient(circle, rgba(13,148,136,0.28) 0%, transparent 70%);
+    }
+
+    #bubbleCanvas {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    }
+
+    /* ── PAGE ── */
+    .page {
+      position: relative; z-index: 2;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* ── BACK BUTTON ── */
+    .back {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--white-dim); text-decoration: none;
+      margin-bottom: 52px;
+      transition: color 0.3s;
+      animation: fadeDown 0.7s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .back:hover { color: var(--white); }
+    .back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    /* ── HEADER ── */
+    .header {
+      margin-bottom: 52px;
+      animation: fadeDown 0.8s 0.05s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .eyebrow {
+      font-size: 0.68rem; letter-spacing: 5px; text-transform: uppercase;
+      color: var(--white-dim); margin-bottom: 14px;
+    }
+    .title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 900; letter-spacing: -1px;
+      color: var(--white);
+      text-shadow: 0 0 60px rgba(13,148,136,0.45);
+      line-height: 1;
+    }
+    .divider {
+      width: 50px; height: 1px; margin-top: 22px;
+      background: linear-gradient(90deg, transparent, var(--teal), transparent);
+    }
+
+    /* ── COLUMN LABELS ── */
+    .col-labels {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 20px 0 20px;
+      margin-bottom: 10px;
+      animation: fadeUp 0.8s 0.12s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .col-label {
+      font-size: 0.62rem; letter-spacing: 4px; text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* ── CHAPTER ROW ── */
+    .chapter-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .chapter {
+      display: flex; align-items: center;
+      padding: 0 24px;
+      height: 64px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--white-faint);
+      backdrop-filter: blur(16px);
+      text-decoration: none; color: var(--white);
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition:
+        border-color 0.35s,
+        box-shadow 0.35s,
+        transform 0.35s cubic-bezier(0.22,1,0.36,1),
+        background 0.35s;
+      animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    /* stagger */
+    .chapter:nth-child(1)  { animation-delay: 0.10s; }
+    .chapter:nth-child(2)  { animation-delay: 0.14s; }
+    .chapter:nth-child(3)  { animation-delay: 0.18s; }
+    .chapter:nth-child(4)  { animation-delay: 0.22s; }
+    .chapter:nth-child(5)  { animation-delay: 0.26s; }
+    .chapter:nth-child(6)  { animation-delay: 0.30s; }
+    .chapter:nth-child(7)  { animation-delay: 0.34s; }
+    .chapter:nth-child(8)  { animation-delay: 0.38s; }
+    .chapter:nth-child(9)  { animation-delay: 0.42s; }
+    .chapter:nth-child(10) { animation-delay: 0.46s; }
+    .chapter:nth-child(11) { animation-delay: 0.50s; }
+    .chapter:nth-child(12) { animation-delay: 0.54s; }
+    .chapter:nth-child(13) { animation-delay: 0.58s; }
+    .chapter:nth-child(14) { animation-delay: 0.62s; }
+    .chapter:nth-child(15) { animation-delay: 0.66s; }
+    .chapter:nth-child(16) { animation-delay: 0.70s; }
+
+    /* left glow sweep on hover */
+    .chapter::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(13,148,136,0.12) 0%, transparent 60%);
+      opacity: 0; transition: opacity 0.35s;
+    }
+    .chapter:hover {
+      border-color: var(--border-hover);
+      background: rgba(13,148,136,0.06);
+      box-shadow: 0 0 30px rgba(0,0,0,0.5), 0 0 20px rgba(13,148,136,0.1);
+      transform: translateX(4px);
+    }
+    .chapter:hover::before { opacity: 1; }
+
+    /* weightage — leftmost */
+    .ch-weight {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--teal-dim);
+      letter-spacing: 1px;
+      width: 72px; flex-shrink: 0;
+      transition: color 0.3s;
+    }
+    .chapter:hover .ch-weight { color: var(--teal); }
+
+    /* thin separator */
+    .ch-sep {
+      width: 1px; height: 24px;
+      background: rgba(255,255,255,0.08);
+      margin: 0 20px; flex-shrink: 0;
+    }
+
+    /* chapter name — center/fill */
+    .ch-name {
+      flex: 1;
+      font-size: 0.92rem; font-weight: 400;
+      letter-spacing: 0.5px;
+      color: var(--white);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: text-shadow 0.3s;
+    }
+    .chapter:hover .ch-name {
+      text-shadow: 0 0 16px rgba(255,255,255,0.3);
+    }
+
+    /* chapter number — rightmost */
+    .ch-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.65rem; font-weight: 700;
+      color: rgba(255,255,255,0.18);
+      letter-spacing: 2px;
+      width: 36px; text-align: right; flex-shrink: 0;
+      transition: color 0.3s;
+    }
+    .chapter:hover .ch-num { color: rgba(255,255,255,0.45); }
+
+    /* arrow icon */
+    .ch-arrow {
+      margin-left: 16px; flex-shrink: 0;
+      opacity: 0; transform: translateX(-6px);
+      transition: opacity 0.3s, transform 0.3s;
+      color: var(--teal);
+      font-size: 0.85rem;
+    }
+    .chapter:hover .ch-arrow { opacity: 1; transform: translateX(0); }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 56px; text-align: center;
+      font-size: 0.65rem; letter-spacing: 4px; text-transform: uppercase;
+      color: rgba(255,255,255,0.15);
+    }
+
+    @keyframes fadeDown {
+      from { opacity:0; transform: translateY(-22px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(24px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    @media (max-width: 540px) {
+      .ch-name { font-size: 0.8rem; }
+      .ch-weight { width: 52px; font-size: 0.6rem; }
+      .ch-sep { margin: 0 10px; }
+      .ch-num { width: 28px; font-size: 0.58rem; }
+      .ch-arrow { margin-left: 8px; }
+      .chapter { padding: 0 14px; height: 58px; }
+    }
+    @media (max-width: 380px) {
+      .ch-name { font-size: 0.73rem; }
+      .ch-weight { width: 46px; font-size: 0.56rem; }
+      .ch-sep { margin: 0 8px; }
+      .ch-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<canvas id="bubbleCanvas"></canvas>
+
+<div class="page">
+
+  <a class="back" href="index.html">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
+
+  <div class="header">
+    <p class="eyebrow">HSC Science PCM &nbsp;·&nbsp; Subject Notes</p>
+    <h1 class="title">Chemistry</h1>
+    <div class="divider"></div>
+  </div>
+
+  <div class="col-labels">
+    <span class="col-label">Weightage</span>
+    <span class="col-label">Chapter No.</span>
+  </div>
+
+  <div class="chapter-list">
+
+    <a class="chapter" href="chem/ch1.pdf">
+      <span class="ch-weight">6 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Solid State</span>
+      <span class="ch-num">01</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch2.pdf">
+      <span class="ch-weight">6 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Solutions</span>
+      <span class="ch-num">02</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch3.pdf">
+      <span class="ch-weight">6 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Ionic Equilibria</span>
+      <span class="ch-num">03</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch4.pdf">
+      <span class="ch-weight">8 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Chemical Thermodynamics</span>
+      <span class="ch-num">04</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch5.pdf">
+      <span class="ch-weight">7 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Electrochem</span>
+      <span class="ch-num">05</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch6.pdf">
+      <span class="ch-weight">6 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Chemical Kinetics</span>
+      <span class="ch-num">06</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch7.pdf">
+      <span class="ch-weight">8 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Elements of Groups 16, 17 and 18</span>
+      <span class="ch-num">07</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch8.pdf">
+      <span class="ch-weight">8 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Transition and Inner Transition Elements</span>
+      <span class="ch-num">08</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch9.pdf">
+      <span class="ch-weight">7 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Coordination Compounds</span>
+      <span class="ch-num">09</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch10.pdf">
+      <span class="ch-weight">7 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Halogen Derivatives</span>
+      <span class="ch-num">10</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch11.pdf">
+      <span class="ch-weight">6 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Alcohols, Phenols and Ethers</span>
+      <span class="ch-num">11</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch12.pdf">
+      <span class="ch-weight">8 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Aldehydes, Ketones and Carboxylic Acids</span>
+      <span class="ch-num">12</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch13.pdf">
+      <span class="ch-weight">4 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Amines</span>
+      <span class="ch-num">13</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch14.pdf">
+      <span class="ch-weight">4 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Biomolecules</span>
+      <span class="ch-num">14</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch15.pdf">
+      <span class="ch-weight">4 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Introduction to Polymer Chemistry</span>
+      <span class="ch-num">15</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+    <a class="chapter" href="chem/ch16.pdf">
+      <span class="ch-weight">3 Marks</span>
+      <span class="ch-sep"></span>
+      <span class="ch-name">Green Chemistry and Nanochemistry</span>
+      <span class="ch-num">16</span>
+      <span class="ch-arrow">→</span>
+    </a>
+
+  </div>
+
+  <p class="footer">HSC 2025–26 &nbsp;·&nbsp; Chemistry &nbsp;·&nbsp; All rights reserved</p>
+
+</div>
+
+<script>
+  const canvas = document.getElementById('bubbleCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, bubbles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  const COLORS = [
+    { r:19,  g:78,  b:74  },
+    { r:13,  g:148, b:136 },
+    { r:15,  g:118, b:110 },
+  ];
+
+  class Bubble {
+    constructor() { this.reset(true); }
+    reset(initial = false) {
+      this.r     = 4 + Math.random() * 20;
+      this.x     = Math.random() * W;
+      this.y     = initial ? Math.random() * H : H + this.r + 10;
+      this.vx    = (Math.random() - 0.5) * 0.4;
+      this.vy    = -(0.2 + Math.random() * 0.45);
+      this.col   = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.alpha = 0.06 + Math.random() * 0.13;
+      this.phase = Math.random() * Math.PI * 2;
+      this.pspd  = 0.008 + Math.random() * 0.014;
+    }
+    draw() {
+      this.x += this.vx; this.y += this.vy; this.phase += this.pspd;
+      const a = this.alpha + Math.sin(this.phase) * 0.03;
+      const r = this.r + Math.sin(this.phase) * 1.5;
+      const {r:cr,g:cg,b:cb} = this.col;
+      const grd = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,r*3);
+      grd.addColorStop(0,   `rgba(${cr},${cg},${cb},${(a*1.2).toFixed(3)})`);
+      grd.addColorStop(0.4, `rgba(${cr},${cg},${cb},${(a*0.5).toFixed(3)})`);
+      grd.addColorStop(1,   `rgba(${cr},${cg},${cb},0)`);
+      ctx.beginPath(); ctx.arc(this.x,this.y,r*3,0,Math.PI*2);
+      ctx.fillStyle = grd; ctx.fill();
+      ctx.beginPath(); ctx.arc(this.x,this.y,r,0,Math.PI*2);
+      ctx.strokeStyle = `rgba(${cr},${cg},${cb},${(a*2).toFixed(3)})`;
+      ctx.lineWidth = 0.8; ctx.stroke();
+      if (this.y < -this.r*5 || this.x < -80 || this.x > W+80) this.reset();
+    }
+  }
+
+  function init() { resize(); bubbles = Array.from({length:28}, () => new Bubble()); }
+  function loop() { ctx.clearRect(0,0,W,H); bubbles.forEach(b=>b.draw()); requestAnimationFrame(loop); }
+  window.addEventListener('resize', resize);
+  init(); loop();
+</script>
+
+</body>
+</html>

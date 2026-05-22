@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mathematics — HSC Study Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #000000;
+      --red: #dc2626;
+      --red-dim: rgba(220,38,38,0.7);
+      --red-faint: rgba(220,38,38,0.08);
+      --darkred: #7f1d1d;
+      --white: #ffffff;
+      --white-dim: rgba(255,255,255,0.5);
+      --white-faint: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(220,38,38,0.5);
+    }
+
+    html, body {
+      width: 100%;
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    .bg-blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(110px); pointer-events: none; z-index: 0;
+    }
+    .bg-blob-1 {
+      width: 520px; height: 520px; top: -140px; left: -120px;
+      background: radial-gradient(circle, rgba(127,29,29,0.45) 0%, transparent 70%);
+    }
+    .bg-blob-2 {
+      width: 580px; height: 580px; bottom: -160px; right: -160px;
+      background: radial-gradient(circle, rgba(220,38,38,0.25) 0%, transparent 70%);
+    }
+
+    #bubbleCanvas {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    }
+
+    .page {
+      position: relative; z-index: 2;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    .back {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--white-dim); text-decoration: none;
+      margin-bottom: 52px;
+      transition: color 0.3s;
+      animation: fadeDown 0.7s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .back:hover { color: var(--white); }
+    .back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    .header {
+      margin-bottom: 48px;
+      animation: fadeDown 0.8s 0.05s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .eyebrow {
+      font-size: 0.68rem; letter-spacing: 5px; text-transform: uppercase;
+      color: var(--white-dim); margin-bottom: 14px;
+    }
+    .title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 900; letter-spacing: -1px;
+      color: var(--white);
+      text-shadow: 0 0 60px rgba(220,38,38,0.45);
+      line-height: 1;
+    }
+    .divider {
+      width: 50px; height: 1px; margin-top: 22px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+    }
+
+    /* ── PART SECTION ── */
+    .part-section {
+      margin-bottom: 36px;
+      animation: fadeUp 0.8s 0.10s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .part-header {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 14px;
+      padding: 0 4px;
+    }
+    .part-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: var(--red-dim);
+    }
+    .part-line {
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, rgba(220,38,38,0.3), transparent);
+    }
+
+    .col-labels {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 20px 0 20px;
+      margin-bottom: 10px;
+    }
+    .col-label {
+      font-size: 0.62rem; letter-spacing: 4px; text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* ── CHAPTER ROW ── */
+    .chapter-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .chapter {
+      display: flex; align-items: center;
+      padding: 0 24px;
+      height: 64px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--white-faint);
+      backdrop-filter: blur(16px);
+      text-decoration: none; color: var(--white);
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition:
+        border-color 0.35s,
+        box-shadow 0.35s,
+        transform 0.35s cubic-bezier(0.22,1,0.36,1),
+        background 0.35s;
+      animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    /* stagger part 1 */
+    .part1 .chapter:nth-child(1) { animation-delay: 0.12s; }
+    .part1 .chapter:nth-child(2) { animation-delay: 0.16s; }
+    .part1 .chapter:nth-child(3) { animation-delay: 0.20s; }
+    .part1 .chapter:nth-child(4) { animation-delay: 0.24s; }
+    .part1 .chapter:nth-child(5) { animation-delay: 0.28s; }
+    .part1 .chapter:nth-child(6) { animation-delay: 0.32s; }
+    .part1 .chapter:nth-child(7) { animation-delay: 0.36s; }
+
+    /* stagger part 2 */
+    .part2 .chapter:nth-child(1)  { animation-delay: 0.40s; }
+    .part2 .chapter:nth-child(2)  { animation-delay: 0.44s; }
+    .part2 .chapter:nth-child(3)  { animation-delay: 0.48s; }
+    .part2 .chapter:nth-child(4)  { animation-delay: 0.52s; }
+    .part2 .chapter:nth-child(5)  { animation-delay: 0.56s; }
+    .part2 .chapter:nth-child(6)  { animation-delay: 0.60s; }
+    .part2 .chapter:nth-child(7)  { animation-delay: 0.64s; }
+    .part2 .chapter:nth-child(8)  { animation-delay: 0.68s; }
+    .part2 .chapter:nth-child(9)  { animation-delay: 0.72s; }
+
+    .chapter::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(220,38,38,0.12) 0%, transparent 60%);
+      opacity: 0; transition: opacity 0.35s;
+    }
+    .chapter:hover {
+      border-color: var(--border-hover);
+      background: rgba(220,38,38,0.06);
+      box-shadow: 0 0 30px rgba(0,0,0,0.5), 0 0 20px rgba(220,38,38,0.1);
+      transform: translateX(4px);
+    }
+    .chapter:hover::before { opacity: 1; }
+
+    .ch-weight {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--red-dim);
+      letter-spacing: 1px;
+      width: 72px; flex-shrink: 0;
+      transition: color 0.3s;
+    }
+    .chapter:hover .ch-weight { color: var(--red); }
+
+    .ch-sep {
+      width: 1px; height: 24px;
+      background: rgba(255,255,255,0.08);
+      margin: 0 20px; flex-shrink: 0;
+    }
+
+    .ch-name {
+      flex: 1;
+      font-size: 0.92rem; font-weight: 400;
+      letter-spacing: 0.5px;
+      color: var(--white);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: text-shadow 0.3s;
+    }
+    .chapter:hover .ch-name {
+      text-shadow: 0 0 16px rgba(255,255,255,0.3);
+    }
+
+    .ch-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.65rem; font-weight: 700;
+      color: rgba(255,255,255,0.18);
+      letter-spacing: 2px;
+      width: 36px; text-align: right; flex-shrink: 0;
+      transition: color 0.3s;
+    }
+    .chapter:hover .ch-num { color: rgba(255,255,255,0.45); }
+
+    .ch-arrow {
+      margin-left: 16px; flex-shrink: 0;
+      opacity: 0; transform: translateX(-6px);
+      transition: opacity 0.3s, transform 0.3s;
+      color: var(--red);
+      font-size: 0.85rem;
+    }
+    .chapter:hover .ch-arrow { opacity: 1; transform: translateX(0); }
+
+    .footer {
+      margin-top: 56px; text-align: center;
+      font-size: 0.65rem; letter-spacing: 4px; text-transform: uppercase;
+      color: rgba(255,255,255,0.15);
+    }
+
+    @keyframes fadeDown {
+      from { opacity:0; transform: translateY(-22px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(24px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    @media (max-width: 540px) {
+      .ch-name { font-size: 0.8rem; }
+      .ch-weight { width: 52px; font-size: 0.6rem; }
+      .ch-sep { margin: 0 10px; }
+      .ch-num { width: 28px; font-size: 0.58rem; }
+      .ch-arrow { margin-left: 8px; }
+      .chapter { padding: 0 14px; height: 58px; }
+    }
+    @media (max-width: 380px) {
+      .ch-name { font-size: 0.73rem; }
+      .ch-weight { width: 46px; font-size: 0.56rem; }
+      .ch-sep { margin: 0 8px; }
+      .ch-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<canvas id="bubbleCanvas"></canvas>
+
+<div class="page">
+
+  <a class="back" href="index.html">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
+
+  <div class="header">
+    <p class="eyebrow">HSC Science PCM &nbsp;·&nbsp; Subject Notes</p>
+    <h1 class="title">Mathematics</h1>
+    <div class="divider"></div>
+  </div>
+
+  <!-- PART 1 -->
+  <div class="part-section">
+    <div class="part-header">
+      <span class="part-label">Part I</span>
+      <div class="part-line"></div>
+    </div>
+    <div class="col-labels">
+      <span class="col-label">Weightage</span>
+      <span class="col-label">Chapter No.</span>
+    </div>
+    <div class="chapter-list part1">
+
+      <a class="chapter" href="m1/ch1.html">
+        <span class="ch-weight">8 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Mathematical Logic</span>
+        <span class="ch-num">01</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m1/ch2.html">
+        <span class="ch-weight">6 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Matrices</span>
+        <span class="ch-num">02</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m1/ch3.html">
+        <span class="ch-weight">10 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Trigonometric Functions</span>
+        <span class="ch-num">03</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m1/ch4.html">
+        <span class="ch-weight">6 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Pair of Straight Lines</span>
+        <span class="ch-num">04</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m1/ch5.html">
+        <span class="ch-weight">12 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Vectors</span>
+        <span class="ch-num">05</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m1/ch6.html">
+        <span class="ch-weight">10 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Line and Plane</span>
+        <span class="ch-num">06</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m1/ch7.html">
+        <span class="ch-weight">4 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Linear Programming (LPP)</span>
+        <span class="ch-num">07</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- PART 2 -->
+  <div class="part-section">
+    <div class="part-header">
+      <span class="part-label">Part II</span>
+      <div class="part-line"></div>
+    </div>
+    <div class="col-labels">
+      <span class="col-label">Weightage</span>
+      <span class="col-label">Chapter No.</span>
+    </div>
+    <div class="chapter-list part2">
+
+      <a class="chapter" href="m2/ch1.html">
+        <span class="ch-weight">9 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Differentiation</span>
+        <span class="ch-num">01</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m2/ch2.html">
+        <span class="ch-weight">9 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Applications of Derivatives</span>
+        <span class="ch-num">02</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m2/ch3.html">
+        <span class="ch-weight">10 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Indefinite Integration</span>
+        <span class="ch-num">03</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m2/ch4.html">
+        <span class="ch-weight">6 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Definite Integration</span>
+        <span class="ch-num">04</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m2/ch5.html">
+        <span class="ch-weight">4 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Application of Definite Integration</span>
+        <span class="ch-num">05</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m2/ch6.html">
+        <span class="ch-weight">8 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Differential Equations</span>
+        <span class="ch-num">06</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m2/ch7.html">
+        <span class="ch-weight">5 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Probability Distributions</span>
+        <span class="ch-num">07</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+      <a class="chapter" href="m2/ch8.html">
+        <span class="ch-weight">5 Marks</span>
+        <span class="ch-sep"></span>
+        <span class="ch-name">Binomial Distribution</span>
+        <span class="ch-num">08</span>
+        <span class="ch-arrow">→</span>
+      </a>
+
+    </div>
+  </div>
+
+  <p class="footer">HSC 2025–26 &nbsp;·&nbsp; Mathematics I & II &nbsp;·&nbsp; All rights reserved</p>
+
+</div>
+
+<script>
+  const canvas = document.getElementById('bubbleCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, bubbles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  const COLORS = [
+    { r:127, g:29,  b:29  },
+    { r:220, g:38,  b:38  },
+    { r:185, g:28,  b:28  },
+  ];
+
+  class Bubble {
+    constructor() { this.reset(true); }
+    reset(initial = false) {
+      this.r     = 4 + Math.random() * 20;
+      this.x     = Math.random() * W;
+      this.y     = initial ? Math.random() * H : H + this.r + 10;
+      this.vx    = (Math.random() - 0.5) * 0.4;
+      this.vy    = -(0.2 + Math.random() * 0.45);
+      this.col   = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.alpha = 0.06 + Math.random() * 0.13;
+      this.phase = Math.random() * Math.PI * 2;
+      this.pspd  = 0.008 + Math.random() * 0.014;
+    }
+    draw() {
+      this.x += this.vx; this.y += this.vy; this.phase += this.pspd;
+      const a = this.alpha + Math.sin(this.phase) * 0.03;
+      const r = this.r + Math.sin(this.phase) * 1.5;
+      const {r:cr,g:cg,b:cb} = this.col;
+      const grd = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,r*3);
+      grd.addColorStop(0,   `rgba(${cr},${cg},${cb},${(a*1.2).toFixed(3)})`);
+      grd.addColorStop(0.4, `rgba(${cr},${cg},${cb},${(a*0.5).toFixed(3)})`);
+      grd.addColorStop(1,   `rgba(${cr},${cg},${cb},0)`);
+      ctx.beginPath(); ctx.arc(this.x,this.y,r*3,0,Math.PI*2);
+      ctx.fillStyle = grd; ctx.fill();
+      ctx.beginPath(); ctx.arc(this.x,this.y,r,0,Math.PI*2);
+      ctx.strokeStyle = `rgba(${cr},${cg},${cb},${(a*2).toFixed(3)})`;
+      ctx.lineWidth = 0.8; ctx.stroke();
+      if (this.y < -this.r*5 || this.x < -80 || this.x > W+80) this.reset();
+    }
+  }
+
+  function init() { resize(); bubbles = Array.from({length:28}, () => new Bubble()); }
+  function loop() { ctx.clearRect(0,0,W,H); bubbles.forEach(b=>b.draw()); requestAnimationFrame(loop); }
+  window.addEventListener('resize', resize);
+  init(); loop();
+</script>
+
+</body>
+</html>
