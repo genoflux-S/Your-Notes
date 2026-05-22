@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mathematical Logic</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #000000;
+      --red: #dc2626;
+      --red-soft: rgba(220,38,38,0.15);
+      --red-border: rgba(220,38,38,0.35);
+      --white: #ffffff;
+      --white-dim: rgba(255,255,255,0.65);
+      --white-soft: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.08);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .blob1 {
+      width: 500px;
+      height: 500px;
+      background: rgba(220,38,38,0.22);
+      top: -120px;
+      left: -120px;
+    }
+
+    .blob2 {
+      width: 600px;
+      height: 600px;
+      background: rgba(127,29,29,0.24);
+      bottom: -200px;
+      right: -160px;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1050px;
+      margin: auto;
+      padding: 70px 24px 120px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      margin-bottom: 40px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: 0.35s ease;
+      backdrop-filter: blur(12px);
+      width: fit-content;
+    }
+
+    .back-btn:hover {
+      border-color: rgba(220,38,38,0.35);
+      background: rgba(220,38,38,0.08);
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 20px rgba(220,38,38,0.12);
+    }
+
+    .eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--white-dim);
+      margin-bottom: 18px;
+    }
+
+    .title {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(3rem, 8vw, 5.8rem);
+      line-height: 0.95;
+      font-weight: 900;
+      letter-spacing: -3px;
+      text-transform: uppercase;
+      text-shadow: 0 0 40px rgba(220,38,38,0.45);
+      margin-bottom: 24px;
+    }
+
+    .divider {
+      width: 90px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--red), transparent);
+      margin-bottom: 55px;
+    }
+
+    .intro-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--red);
+      backdrop-filter: blur(18px);
+      padding: 26px;
+      border-radius: 18px;
+      margin-bottom: 50px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.45);
+    }
+
+    .section {
+      margin-bottom: 34px;
+      animation: fadeUp 0.8s ease;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .section-title h2 {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.15rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--red);
+      white-space: nowrap;
+    }
+
+    .line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(220,38,38,0.45), transparent);
+    }
+
+    .card {
+      background: rgba(255,255,255,0.035);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 0 30px rgba(0,0,0,0.35);
+      transition: 0.35s ease;
+    }
+
+    .card:hover {
+      border-color: var(--red-border);
+      transform: translateY(-3px);
+      box-shadow: 0 0 35px rgba(220,38,38,0.12);
+    }
+
+    p {
+      color: var(--white-dim);
+      line-height: 1.8;
+      margin-bottom: 14px;
+      font-size: 0.98rem;
+    }
+
+    ul {
+      padding-left: 20px;
+      color: var(--white-dim);
+      line-height: 1.9;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .formula {
+      background: rgba(220,38,38,0.07);
+      border: 1px solid rgba(220,38,38,0.25);
+      border-radius: 14px;
+      padding: 18px;
+      margin: 18px 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: #fff;
+      box-shadow: inset 0 0 20px rgba(220,38,38,0.08),
+                  0 0 24px rgba(220,38,38,0.08);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+
+    th {
+      background: rgba(220,38,38,0.16);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      padding: 16px;
+      border: 1px solid rgba(220,38,38,0.2);
+    }
+
+    td {
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--white-dim);
+      background: rgba(255,255,255,0.02);
+    }
+
+    tr:hover td {
+      background: rgba(220,38,38,0.04);
+    }
+
+    .truth {
+      color: #22c55e;
+      font-weight: 600;
+    }
+
+    .false {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    .footer {
+      margin-top: 80px;
+      padding: 28px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(220,38,38,0.18);
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .footer h3 {
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 4px;
+      margin-bottom: 14px;
+      color: var(--red);
+    }
+
+    .binary {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Inter', sans-serif;
+      color: rgba(255,255,255,0.06);
+      font-size: 0.7rem;
+      line-height: 1.8;
+      pointer-events: none;
+      z-index: 0;
+      letter-spacing: 3px;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .title {
+        font-size: 3.2rem;
+      }
+
+      .container {
+        padding: 50px 18px 90px;
+      }
+
+      .binary {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+
+<div class="binary">
+101010101<br>
+TRUE FALSE<br>
+110011001<br>
+p → q<br>
+001101011<br>
+∧ ∨ ∼ ↔<br>
+101001011
+</div>
+
+<div class="container">
+
+  <a class="back-btn" href="../maths.html">
+    ← Back 
+  </a>
+
+  <p class="eyebrow">HSC Mathematics • Chapter 01</p>
+
+  <h1 class="title">
+    Mathematical<br>
+    Logic
+  </h1>
+
+  <div class="divider"></div>
+
+  <div class="intro-box">
+    <p>
+      Mathematical Logic is the rulebook for clear and correct thinking.
+      In mathematics, getting the correct answer is important, but proving
+      that every step of reasoning is correct is equally important.
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Statements</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <p>
+        A statement is a declarative sentence that is either:
+      </p>
+
+      <ul>
+        <li>True (T)</li>
+        <li>False (F)</li>
+      </ul>
+
+      <p>but not both at the same time.</p>
+
+      <div class="formula">
+        2 + 3 = 99 → False (F)
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Truth Value</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <table>
+        <tr>
+          <th>Statement Type</th>
+          <th>Truth Value</th>
+        </tr>
+        <tr>
+          <td>True Statement</td>
+          <td class="truth">T (True)</td>
+        </tr>
+        <tr>
+          <td>False Statement</td>
+          <td class="false">F (False)</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Logical Connectives</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <p>
+        Logical connectives connect two or more simple statements.
+      </p>
+
+      <table>
+        <tr>
+          <th>Connective</th>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Tip to learn</th>
+        </tr>
+        <tr>
+          <td>and</td>
+          <td>∧</td>
+          <td>Conjunction</td>
+          <td>True only if both statements are true</td>
+        </tr>
+        <tr>
+          <td>or</td>
+          <td>∨</td>
+          <td>Disjunction</td>
+          <td>False only if both statements are false</td>
+        </tr>
+        <tr>
+          <td>not</td>
+          <td>∼</td>
+          <td>Negation</td>
+          <td>Reverses truth value</td>
+        </tr>
+        <tr>
+          <td>if...then</td>
+          <td>→</td>
+          <td>Conditional</td>
+          <td>False only when p is true and q is false(if p → q is a statements)</td>
+        </tr>
+        <tr>
+          <td>if and only if</td>
+          <td>↔</td>
+          <td>Bi-conditional</td>
+          <td>True when both statements have same truth values</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Operations</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <div class="formula">p ∧ q → Conjunction (AND)</div>
+      <p>True only when both p and q are true.</p>
+
+      <div class="formula">p ∨ q → Disjunction (OR)</div>
+      <p>False only when both statements are false.</p>
+
+      <div class="formula">∼p → Negation (NOT)</div>
+      <p>Reverses the truth value of a statement.</p>
+
+      <table>
+        <tr>
+          <th>p</th>
+          <th>∼p</th>
+        </tr>
+        <tr>
+          <td>T</td>
+          <td>F</td>
+        </tr>
+        <tr>
+          <td>F</td>
+          <td>T</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Conditional & Bi-conditional</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <div class="formula">p → q</div>
+      <p>
+        False only when p is true and q is false.
+      </p>
+
+      <div class="formula">p ↔ q</div>
+      <p>
+        True only when both statements have the same truth values.
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Tautology & Contradiction</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <ul>
+        <li><b>Tautology:</b> Final column of truth table contains only True values.</li>
+        <li><b>Contradiction:</b> Final column of truth table contains only False values.</li>
+        <li><b>Contingency:</b> Contains both True and False values .</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Quantifiers</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <div class="formula">∀x ∈ N, x + 0 = x</div>
+      <p>
+        Universal Quantifier → “For all”
+      </p>
+
+      <div class="formula">∃x ∈ N such that x² = 4</div>
+      <p>
+        Existential Quantifier → “There exists”
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Duality</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <ul>
+        <li>∧ and ∨ get replace </li>
+        <li>Tautology and Contradiction get replace </li>
+        <li>Negation (∼) does not change it remains same </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Rules of Negation</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <div class="formula">∼(p∧q) ≡ ∼p∨∼q</div>
+      <div class="formula">∼(p∨q) ≡ ∼p∧∼q</div>
+      <div class="formula">∼(p→q) ≡ p∧∼q</div>
+      <div class="formula">∼(p↔q) ≡ (p∧∼q) ∨ (q∧∼p)</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Variations of Implication</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <table>
+        <tr>
+          <th>Type</th>
+          <th>Form</th>
+        </tr>
+        <tr>
+          <td>Converse</td>
+          <td>q → p</td>
+        </tr>
+        <tr>
+          <td>Inverse</td>
+          <td>∼p → ∼q</td>
+        </tr>
+        <tr>
+          <td>Contrapositive</td>
+          <td>∼q → ∼p</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>Switching Diagrams</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <div class="formula">p ∧ q → Series Connection (AND)</div>
+      <p>Current flows only when both switches are closed.</p>
+
+      <div class="formula">p ∨ q → Parallel Connection (OR)</div>
+      <p>Current flows if at least one switch is closed.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <h2>How to Read Circuits</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <ul>
+        <li>p and q represent switches</li>
+        <li>∼p is written as S₁′</li>
+        <li>Parallel branches → ∨</li>
+        <li>Same wire → ∧</li>
+        <li>Use Battery, Lamp (L), and switches</li>
+        <li>1 = ON / True</li>
+        <li>0 = OFF / False</li>
+      </ul>
+
+      <table>
+        <tr>
+          <th>Result</th>
+          <th>Type</th>
+        </tr>
+        <tr>
+          <td>Always ON</td>
+          <td>Tautology</td>
+        </tr>
+        <tr>
+          <td>Always OFF</td>
+          <td>Contradiction</td>
+        </tr>
+        <tr>
+          <td>Sometimes ON/OFF</td>
+          <td>Contingency</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <h3>All The Best</h3>
+    <p>
+      Practice PYQs regularly and learn the negation formulas carefully.
+    </p>
+  </div>
+
+</div>
+
+</body>
+</html>
