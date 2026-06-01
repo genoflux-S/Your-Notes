@@ -174,6 +174,7 @@
       backdrop-filter: blur(14px);
       box-shadow: 0 0 30px rgba(0,0,0,0.35);
       transition: 0.35s ease;
+      overflow-x: auto;
     }
 
     .card:hover {
@@ -219,6 +220,7 @@
       margin-top: 20px;
       overflow: hidden;
       border-radius: 16px;
+     min-width: 700px;
     }
 
     th {
@@ -307,6 +309,11 @@
       .binary {
         display: none;
       }
+      th,
+td {
+  padding: 10px;
+  font-size: 0.85rem;
+}
     }
   </style>
 </head>
