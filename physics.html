@@ -21,7 +21,75 @@
       --border: rgba(255,255,255,0.07);
       --border-hover: rgba(180,180,180,0.35);
     }
+<script>
+// Simple Dark Chat Panel - Opens Gemini/ChatGPT in same tab
+function initSimpleAIChat() {
+  const bubble = document.createElement('div');
+  bubble.id = 'simple-ai-bubble';
+  bubble.style.cssText = `
+    position: fixed; bottom: 25px; right: 25px; width: 58px; height: 58px;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 9999; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+    transition: all 0.3s ease;
+  `;
+  bubble.innerHTML = `<span style="font-size: 28px;">✨</span>`;
 
+  const panel = document.createElement('div');
+  panel.id = 'simple-ai-panel';
+  panel.style.cssText = `
+    position: fixed; bottom: 95px; right: 25px; width: 400px; height: 620px;
+    background: #0f172a; border: 1px solid #475569; border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.8); display: none; flex-direction: column;
+    overflow: hidden; z-index: 10000; opacity: 0; transform: scale(0.95);
+    transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+  `;
+
+  panel.innerHTML = `
+    <div style="padding: 16px 20px; background: #1e2937; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+      <div style="color:#e0e7ff; font-weight:600;">HSC AI Helper</div>
+      <button id="close-simple-chat" style="background:none; border:none; color:#94a3b8; font-size:28px; cursor:pointer;">×</button>
+    </div>
+    
+    <div style="flex:1; padding:10px; background:#0f172a;">
+      <iframe id="ai-iframe" 
+              style="width:100%; height:100%; border:none; border-radius:12px;" 
+              allowfullscreen></iframe>
+    </div>
+  `;
+
+  document.body.appendChild(bubble);
+  document.body.appendChild(panel);
+
+  let isOpen = false;
+
+  bubble.addEventListener('click', () => {
+    isOpen = !isOpen;
+    if (isOpen) {
+      // Change this URL to Gemini or ChatGPT
+      document.getElementById('ai-iframe').src = "https://gemini.google.com/";
+      panel.style.display = 'flex';
+      setTimeout(() => {
+        panel.style.opacity = '1';
+        panel.style.transform = 'scale(1)';
+      }, 10);
+    } else {
+      panel.style.opacity = '0';
+      panel.style.transform = 'scale(0.95)';
+      setTimeout(() => { panel.style.display = 'none'; }, 350);
+    }
+  });
+
+  document.getElementById('close-simple-chat').addEventListener('click', () => {
+    isOpen = false;
+    panel.style.opacity = '0';
+    panel.style.transform = 'scale(0.95)';
+    setTimeout(() => panel.style.display = 'none', 350);
+  });
+}
+
+initSimpleAIChat();
+</script>
     html, body {
       width: 100%;
       background: var(--bg);
